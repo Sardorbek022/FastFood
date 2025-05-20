@@ -1,7 +1,8 @@
 from rest_framework import viewsets, permissions
 from ..models.order import OrderModel
 from ..serializers import OrderSerializer
-from fastfood.permissions import IsAdmin, IsWaiter, IsUser
+from fastfood.permissions import IsAdmin, IsWaiter, IsUser, OrPermission  
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = OrderModel.objects.all()
@@ -11,7 +12,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.IsAuthenticated(), IsUser()]
         elif self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAuthenticated(), IsAdmin() | IsWaiter()]
+            return [permissions.IsAuthenticated(), OrPermission(IsAdmin, IsWaiter)]
         return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
